@@ -412,10 +412,10 @@ function validPosition(value) {
 
 function isElevatorPosition(position) {
   const { elevator } = prisonMap;
-  return position.x >= elevator.minX - 0.25
-    && position.x <= elevator.maxX + 0.25
-    && position.z >= elevator.minZ - 0.2
-    && position.z <= elevator.maxZ + 0.2;
+  return position.x >= elevator.minX - 0.6
+    && position.x <= elevator.maxX + 0.6
+    && position.z >= elevator.minZ - 0.55
+    && position.z <= elevator.maxZ + 0.55;
 }
 
 function isWalkablePosition(position) {
@@ -424,8 +424,8 @@ function isWalkablePosition(position) {
   const floorY = floorIndex * floorHeight;
   const supportedOnFloor = Math.abs(position.y - (floorY + 0.86)) <= 1.35;
 
-  if (position.z >= elevator.minZ - 0.2 && position.z <= elevator.maxZ + 0.2
-    && position.x >= elevator.minX - 0.25 && position.x <= elevator.maxX + 0.25) {
+  if (position.z >= elevator.minZ - 0.55 && position.z <= elevator.maxZ + 0.55
+    && position.x >= elevator.minX - 0.6 && position.x <= elevator.maxX + 0.6) {
     return true;
   }
 
@@ -881,7 +881,7 @@ async function handleSocketConnection(socket) {
     const maxVerticalDistance = interactionMove
       ? 1.8
       : elevatorRide
-        ? prisonMap.elevator.speed * elapsed + 0.25
+        ? Math.max(prisonMap.elevator.speed * elapsed + 0.25, 0.6)
         : Math.max(0.75, 8.5 * elapsed + 0.25);
 
     if (invalidInteractionState

@@ -156,6 +156,15 @@ export function buildPrison(scene, physics) {
     concrete: new THREE.MeshStandardMaterial({ map: concreteTexture, color: '#c4c0b5', roughness: 0.96 }),
     concretePanel: new THREE.MeshStandardMaterial({ color: '#918c80', roughness: 0.92 }),
     floor: new THREE.MeshStandardMaterial({ map: floorTexture, color: '#a4a198', roughness: 0.96 }),
+    stairTread: new THREE.MeshStandardMaterial({ color: '#68716d', metalness: 0.38, roughness: 0.64 }),
+    stairRiser: new THREE.MeshStandardMaterial({ color: '#353d3a', metalness: 0.2, roughness: 0.86 }),
+    stairEdge: new THREE.MeshStandardMaterial({
+      color: '#d3a15e',
+      emissive: '#6b4820',
+      emissiveIntensity: 0.32,
+      metalness: 0.28,
+      roughness: 0.58,
+    }),
     yardFloor: new THREE.MeshStandardMaterial({ map: floorTexture, color: '#858a82', roughness: 0.97 }),
     metal: new THREE.MeshStandardMaterial({ color: '#626b67', metalness: 0.72, roughness: 0.42 }),
     gate: new THREE.MeshStandardMaterial({ color: '#3e4844', metalness: 0.72, roughness: 0.48 }),
@@ -264,7 +273,13 @@ export function buildPrison(scene, physics) {
     return door;
   };
 
-  const builder = { addBox, addMesh, addInstance, addDoor, materials };
+  const addPointLight = (color, intensity, distance, position) => {
+    const light = new THREE.PointLight(color, intensity, distance, 1.8);
+    light.position.set(...position);
+    scene.add(light);
+  };
+  const addRamp = (center, size, rotationX) => physics.addFixedRamp(center, size, rotationX);
+  const builder = { addBox, addMesh, addInstance, addDoor, addPointLight, addRamp, materials };
   buildYard(builder);
   buildStairwell(builder);
 

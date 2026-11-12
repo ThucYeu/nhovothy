@@ -100,15 +100,6 @@ export class Elevator {
       }
       this.scene.add(group);
 
-      const button = new THREE.Mesh(
-        new THREE.BoxGeometry(0.08, 0.34, 0.24),
-        this.materials.metal,
-      );
-      button.position.set(this.centerX, floorY + 1.05, CALL_BUTTON_Z);
-      button.castShadow = true;
-      this.scene.add(button);
-      this.cameraOccluders.push(button);
-
       this.floors.push({
         floorIndex,
         floorY,
@@ -130,16 +121,16 @@ export class Elevator {
   isPlayerInside(position) {
     return Math.abs(position.x - this.centerX) < CABIN_HALF - 0.3
       && Math.abs(position.z - this.centerZ) < CABIN_HALF - 0.3
-      && position.y >= this.currentY + 0.5
-      && position.y <= this.currentY + 2.7;
+      && position.y >= this.currentY + 0.15
+      && position.y <= this.currentY + 3.2;
   }
 
   isPlayerOnPlatform(position) {
     return this.riderInside
       && Math.abs(position.x - this.centerX) < CABIN_HALF - 0.3
       && Math.abs(position.z - this.centerZ) < CABIN_HALF - 0.3
-      && position.y >= this.currentY + 0.5
-      && position.y <= this.currentY + 2.7;
+      && position.y >= this.currentY - 0.5
+      && position.y <= this.currentY + 3.4;
   }
 
   callFloor(floorIndex) {

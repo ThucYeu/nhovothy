@@ -146,6 +146,14 @@ export class Game {
       this.pause();
       if (document.pointerLockElement === this.canvas) document.exitPointerLock();
     };
+    this.handleCameraToggle = (event) => {
+      if (event.code !== 'KeyL' || event.repeat || this.state !== 'playing') return;
+      const target = event.target;
+      if (target instanceof HTMLElement
+        && (target.isContentEditable || target.matches('input, textarea, select, button'))) return;
+      event.preventDefault();
+      this.toggleCameraView();
+    };
     this.handleCursorToggle = (event) => {
       if (!['ControlLeft', 'ControlRight'].includes(event.code)
         || event.repeat
@@ -183,12 +191,18 @@ export class Game {
     window.visualViewport?.addEventListener('resize', this.handleResize);
     document.addEventListener('fullscreenchange', this.handleResize);
     window.addEventListener('keydown', this.handleEscape);
+    window.addEventListener('keydown', this.handleCameraToggle);
     window.addEventListener('keydown', this.handleCursorToggle);
     window.addEventListener('keydown', this.handleElevatorKeydown);
     document.addEventListener('pointerlockchange', this.handlePointerLock);
     canvas.addEventListener('click', this.handleCanvasClick);
     this.setState('menu');
     this.animate();
+  }
+
+  toggleCameraView() {
+    this.cameraRig.firstPerson = !this.cameraRig.firstPerson;
+    this.player.model.visible = !this.cameraRig.firstPerson;
   }
 
   setupElevatorControls() {
@@ -210,6 +224,7 @@ export class Game {
       if (!match) return;
       event.preventDefault();
       const floorIndex = Number(match[1]) - 1;
+      if (floorIndex >= mapLayout.floorCount) return;
       if (this.world.elevator.selectFloor(floorIndex)) {
         this.elevatorFloorStatus.textContent = `ĐANG ĐẾN TẦNG ${floorIndex + 1}`;
       }
@@ -306,6 +321,9 @@ export class Game {
 
     document.querySelector('#touch-chat').addEventListener('click', () => {
       window.dispatchEvent(new CustomEvent('game:toggle-chat'));
+    });
+    document.querySelector('#touch-camera').addEventListener('click', () => {
+      if (this.state === 'playing') this.toggleCameraView();
     });
     document.querySelector('#touch-menu').addEventListener('click', () => this.pause());
 
@@ -434,11 +452,19 @@ export class Game {
     this.frame = requestAnimationFrame(this.animate);
     const delta = Math.min(this.clock.getDelta(), 0.05);
     if (this.state === 'playing') {
-      const elevatorDeltaY = this.world.elevator.update(
+      const elevator = this.world.elevator;
+      const elevatorWasMoving = elevator.moving;
+      const elevatorDeltaY = elevator.update(
         delta,
         this.playerController.getPosition(),
       );
-      this.playerController.update(delta, this.cameraRig.yaw, elevatorDeltaY);
+      const elevatorRiding = elevator.riderInside && (elevatorWasMoving || elevator.moving);
+      this.playerController.update(
+        delta,
+        this.cameraRig.yaw,
+        elevatorDeltaY,
+        elevatorRiding,
+      );
       this.doorSystem.update(delta, this.playerController.getPosition(), this.input);
       this.updateElevatorControls();
     } else {
@@ -474,6 +500,7 @@ export class Game {
     window.visualViewport?.removeEventListener('resize', this.handleResize);
     document.removeEventListener('fullscreenchange', this.handleResize);
     window.removeEventListener('keydown', this.handleEscape);
+    window.removeEventListener('keydown', this.handleCameraToggle);
     window.removeEventListener('keydown', this.handleCursorToggle);
     window.removeEventListener('keydown', this.handleElevatorKeydown);
     document.removeEventListener('pointerlockchange', this.handlePointerLock);

@@ -8,9 +8,11 @@ export class CameraRig {
     this.yaw = 0;
     this.pitch = 0.3;
     this.distance = 5.2;
+    this.firstPerson = false;
     this.raycaster = new THREE.Raycaster();
     this.direction = new THREE.Vector3();
     this.target = new THREE.Vector3();
+    this.lookTarget = new THREE.Vector3();
     this.desiredPosition = new THREE.Vector3();
     this.mouseSensitivity = 0.0024;
 
@@ -30,23 +32,34 @@ export class CameraRig {
   }
 
   update(playerPosition, delta) {
-    this.target.set(playerPosition.x, playerPosition.y + 0.95, playerPosition.z);
+    this.target.set(
+      playerPosition.x,
+      playerPosition.y + (this.firstPerson ? 1.53 : 0.95),
+      playerPosition.z,
+    );
     const horizontal = Math.cos(this.pitch);
     this.direction.set(
       Math.sin(this.yaw) * horizontal,
       Math.sin(this.pitch),
       Math.cos(this.yaw) * horizontal,
     ).normalize();
-    this.desiredPosition.copy(this.target).addScaledVector(this.direction, this.distance);
+    this.lookTarget.copy(this.target);
 
-    this.raycaster.set(this.target, this.direction);
-    this.raycaster.far = this.distance;
-    const hit = this.raycaster.intersectObjects(this.occluders, false)[0];
-    if (hit) {
-      this.desiredPosition.copy(this.target).addScaledVector(this.direction, Math.max(1.1, hit.distance - 0.32));
+    if (this.firstPerson) {
+      this.desiredPosition.copy(this.target);
+      this.lookTarget.addScaledVector(this.direction, -10);
+    } else {
+      this.desiredPosition.copy(this.target).addScaledVector(this.direction, this.distance);
+      this.raycaster.set(this.target, this.direction);
+      this.raycaster.far = this.distance;
+      const hit = this.raycaster.intersectObjects(this.occluders, false)[0];
+      if (hit) {
+        this.desiredPosition.copy(this.target)
+          .addScaledVector(this.direction, Math.max(1.1, hit.distance - 0.32));
+      }
     }
 
     this.camera.position.lerp(this.desiredPosition, 1 - Math.exp(-9 * delta));
-    this.camera.lookAt(this.target);
+    this.camera.lookAt(this.lookTarget);
   }
 }

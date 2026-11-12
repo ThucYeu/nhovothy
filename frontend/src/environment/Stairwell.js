@@ -4,11 +4,15 @@ import mapLayout from '../../../data/prison-map.json';
 const STAIR_TREAD = 0.42;
 const STEPS_PER_FLIGHT = mapLayout.stairs.stepsPerFlight;
 const STAIR_RISE = mapLayout.floorHeight / (2 * STEPS_PER_FLIGHT);
+const RAMP_THICKNESS = 0.18;
 
 export function buildStairwell(world) {
-  const { addBox, addMesh, materials } = world;
+  const { addBox, addMesh, addRamp, addPointLight, materials } = world;
   const totalHeight = mapLayout.floorHeight * mapLayout.floorCount;
   const stairLength = STEPS_PER_FLIGHT * STAIR_TREAD;
+  const stairRise = mapLayout.floorHeight / 2;
+  const slopeLength = Math.hypot(stairLength, stairRise);
+  const slopeAngle = Math.atan2(stairRise, stairLength);
   const stairCenterX = (mapLayout.stairs.minX + mapLayout.stairs.maxX) / 2;
   const landingWidth = mapLayout.stairs.maxX - mapLayout.stairs.minX;
   const wallThickness = 0.24;
@@ -35,27 +39,6 @@ export function buildStairwell(world) {
 
   for (let floor = 0; floor < mapLayout.floorCount - 1; floor += 1) {
     const floorY = floor * mapLayout.floorHeight;
-    for (let step = 0; step < STEPS_PER_FLIGHT; step += 1) {
-      const rise = (step + 1) * STAIR_RISE;
-      const firstZ = mapLayout.stairs.startZ + (step + 0.5) * STAIR_TREAD;
-      const secondZ = mapLayout.stairs.endZ - (step + 0.5) * STAIR_TREAD;
-
-      addBox(
-        [mapLayout.stairs.flightWidth, STAIR_RISE, STAIR_TREAD + 0.04],
-        [mapLayout.stairs.firstCenterX, floorY + rise - STAIR_RISE / 2, firstZ],
-        materials.floor,
-      );
-      addBox(
-        [mapLayout.stairs.flightWidth, STAIR_RISE, STAIR_TREAD + 0.04],
-        [
-          mapLayout.stairs.secondCenterX,
-          floorY + mapLayout.floorHeight / 2 + rise - STAIR_RISE / 2,
-          secondZ,
-        ],
-        materials.floor,
-      );
-    }
-
     addBox(
       [landingWidth, 0.18, 0.58],
       [
@@ -75,6 +58,48 @@ export function buildStairwell(world) {
       [mapLayout.stairs.firstCenterX, mapLayout.stairs.startZ, 1, floorY],
       [mapLayout.stairs.secondCenterX, mapLayout.stairs.endZ, -1, floorY + mapLayout.floorHeight / 2],
     ]) {
+      const centerZ = startZ + direction * stairLength / 2;
+      const rotationX = -direction * slopeAngle;
+      addRamp(
+        {
+          x: centerX,
+          y: baseY + stairRise / 2 - RAMP_THICKNESS * Math.cos(slopeAngle) / 2,
+          z: centerZ + direction * RAMP_THICKNESS * Math.sin(slopeAngle) / 2,
+        },
+        { x: mapLayout.stairs.flightWidth, y: RAMP_THICKNESS, z: slopeLength },
+        rotationX,
+      );
+
+      for (let step = 0; step < STEPS_PER_FLIGHT; step += 1) {
+        const rise = (step + 1) * STAIR_RISE;
+        const stepZ = startZ + direction * (step + 0.5) * STAIR_TREAD;
+        const stepY = baseY + rise;
+        const stepOptions = { collide: false, blocker: false };
+
+        addBox(
+          [mapLayout.stairs.flightWidth, STAIR_RISE, STAIR_TREAD + 0.04],
+          [centerX, stepY - STAIR_RISE / 2, stepZ],
+          materials.stairRiser,
+          stepOptions,
+        );
+        addBox(
+          [mapLayout.stairs.flightWidth - 0.12, 0.055, STAIR_TREAD - 0.08],
+          [centerX, stepY - 0.0275, stepZ],
+          materials.stairTread,
+          stepOptions,
+        );
+        addBox(
+          [mapLayout.stairs.flightWidth - 0.12, 0.018, 0.035],
+          [
+            centerX,
+            stepY + 0.002,
+            stepZ - direction * (STAIR_TREAD / 2 - 0.045),
+          ],
+          materials.stairEdge,
+          stepOptions,
+        );
+      }
+
       for (const side of [-1, 1]) {
         const railX = centerX + side * (mapLayout.stairs.flightWidth / 2 - 0.04);
         for (let post = 0; post <= STEPS_PER_FLIGHT; post += 2) {
@@ -92,8 +117,15 @@ export function buildStairwell(world) {
           materials.metal,
           { blocker: false },
         );
-        handrail.rotation.x = direction * Math.atan2(mapLayout.floorHeight / 2, stairLength);
+        handrail.rotation.x = rotationX;
       }
     }
+
+    addPointLight(
+      '#f2d5a1',
+      2.3,
+      7.5,
+      [stairCenterX, floorY + mapLayout.floorHeight / 2 + 1.15, mapLayout.stairs.endZ + 0.35],
+    );
   }
 }

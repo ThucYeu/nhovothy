@@ -23,6 +23,21 @@ export class Physics {
     return { body, collider: this.world.createCollider(collider, body) };
   }
 
+  addFixedRamp(center, size, rotationX) {
+    const body = this.world.createRigidBody(
+      this.RAPIER.RigidBodyDesc.fixed().setTranslation(center.x, center.y, center.z),
+    );
+    const collider = this.RAPIER.ColliderDesc.cuboid(size.x / 2, size.y / 2, size.z / 2)
+      .setRotation({
+        x: Math.sin(rotationX / 2),
+        y: 0,
+        z: 0,
+        w: Math.cos(rotationX / 2),
+      })
+      .setFriction(0.9);
+    return { body, collider: this.world.createCollider(collider, body) };
+  }
+
   createElevatorBody(centerX, centerZ) {
     const body = this.world.createRigidBody(
       this.RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(centerX, 0, centerZ),

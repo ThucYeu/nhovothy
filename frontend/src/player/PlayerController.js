@@ -19,7 +19,7 @@ export class PlayerController {
     this.position = new THREE.Vector3();
   }
 
-  update(delta, cameraYaw, elevatorDeltaY = 0) {
+  update(delta, cameraYaw, elevatorDeltaY = 0, elevatorRiding = false) {
     if (this.interaction) {
       this.updateInteraction(delta);
       return;
@@ -43,17 +43,41 @@ export class PlayerController {
       this.verticalVelocity = 6.8;
       this.grounded = false;
     }
-    this.verticalVelocity = this.grounded && this.verticalVelocity < 0
-      ? -1.2
-      : this.verticalVelocity - 18 * delta;
+    let elevatorRideY = null;
+    if (elevatorRiding) {
+      const position = this.body.translation();
+      elevatorRideY = position.y + elevatorDeltaY;
+      this.body.setTranslation({
+        x: position.x,
+        y: elevatorRideY,
+        z: position.z,
+      }, true);
+      this.verticalVelocity = 0;
+      this.grounded = true;
+    } else {
+      this.verticalVelocity = this.grounded && this.verticalVelocity < 0
+        ? -1.2
+        : this.verticalVelocity - 18 * delta;
+    }
 
     const grounded = this.physics.moveCharacter(this.body, this.collider, {
       x: this.moveVector.x * speed * delta,
-      y: this.verticalVelocity * delta + elevatorDeltaY,
+      y: elevatorRiding ? 0 : this.verticalVelocity * delta + elevatorDeltaY,
       z: this.moveVector.z * speed * delta,
     }, delta);
-    if (grounded && this.verticalVelocity < 0) this.verticalVelocity = 0;
-    this.grounded = grounded;
+    if (elevatorRiding) {
+      const position = this.body.translation();
+      this.body.setTranslation({
+        x: position.x,
+        y: elevatorRideY,
+        z: position.z,
+      }, true);
+      this.verticalVelocity = 0;
+      this.grounded = true;
+    } else {
+      if (grounded && this.verticalVelocity < 0) this.verticalVelocity = 0;
+      this.grounded = grounded;
+    }
 
     if (hasInput) {
       const targetYaw = Math.atan2(-this.moveVector.x, -this.moveVector.z);
