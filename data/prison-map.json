@@ -1,0 +1,64 @@
+{
+  "floorCount": 9,
+  "floorHeight": 4.2,
+  "corridor": {
+    "startZ": 5,
+    "endZ": 20,
+    "cellCenters": [7.5, 12.5, 17.5],
+    "halfWidth": 3.5
+  },
+  "cell": {
+    "halfWidth": 2,
+    "halfDepth": 3
+  },
+  "stairs": {
+    "minX": -3.2,
+    "maxX": 0.05,
+    "startZ": 23.45,
+    "endZ": 27.8,
+    "flightWidth": 1.7,
+    "firstCenterX": -2.3,
+    "secondCenterX": -1.05,
+    "stepsPerFlight": 10
+  },
+  "elevator": {
+    "centerX": 1.85,
+    "centerZ": 26,
+    "minX": 0.55,
+    "maxX": 3.15,
+    "minZ": 24.7,
+    "maxZ": 27.3,
+    "speed": 2.1
+  },
+  "spawn": {
+    "roomOrder": [4, 3, 5, 2, 6, 1],
+    "offsets": [
+      [-0.45, -0.55],
+      [0.45, -0.55],
+      [-0.45, 0.55],
+      [0.45, 0.55]
+    ]
+  },
+  "floorNames": [
+    "KHU TIẾP NHẬN",
+    "KHU GIAM THƯỜNG A",
+    "KHU GIAM THƯỜNG B",
+    "KHU SINH HOẠT",
+    "KHU LAO ĐỘNG",
+    "KHU AN NINH CAO",
+    "KHU BIỆT GIAM",
+    "KHU ĐIỀU KHIỂN BÍ MẬT",
+    "KHU GIÁM ĐỐC"
+  ],
+  "floorAccents": [
+    "#d5a25e",
+    "#9aa98b",
+    "#829bb0",
+    "#d5b66e",
+    "#bf8050",
+    "#c45549",
+    "#7c8a9a",
+    "#9a7fb5",
+    "#d3c080"
+  ]
+}

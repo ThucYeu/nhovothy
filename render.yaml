@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: prison-life-3d
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start:server
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ALLOWED_ORIGINS
+        value: https://toiyeuban.onrender.com,https://prison-life-3d.onrender.com

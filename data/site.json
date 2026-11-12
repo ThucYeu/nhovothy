@@ -1,0 +1,19 @@
+{
+  "name": "Website của bạn",
+  "title": "Bắt đầu từ ý tưởng của bạn",
+  "description": "Đây là giao diện mẫu. Hãy thay nội dung trong thư mục data để bắt đầu xây dựng website theo mục đích của bạn.",
+  "sections": [
+    {
+      "title": "Giới thiệu",
+      "description": "Thêm thông tin giới thiệu về website hoặc dự án của bạn tại đây."
+    },
+    {
+      "title": "Nội dung",
+      "description": "Thay phần này bằng nội dung chính mà bạn muốn chia sẻ với người xem."
+    },
+    {
+      "title": "Liên hệ",
+      "description": "Bổ sung thông tin liên hệ hoặc hướng dẫn kết nối với bạn tại đây."
+    }
+  ]
+}

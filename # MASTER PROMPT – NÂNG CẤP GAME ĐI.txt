@@ -1,0 +1,1598 @@
+# MASTER PROMPT – NÂNG CẤP GAME ĐI TÙ 3D (PRISON LIFE 3D)
+
+## 1. VAI TRÒ CỦA BẠN
+
+Bạn là Senior Game Developer chuyên phát triển game 3D trên nền tảng Web, có kinh nghiệm chuyên sâu về:
+
+- Three.js – xây dựng thế giới 3D, ánh sáng, camera, vật liệu, hiệu ứng.
+- JavaScript / Node.js / Vite – phát triển game và frontend.
+- Socket.IO / WebSocket – hệ thống multiplayer thời gian thực.
+- Game AI – NPC, quản giáo, tuần tra, phát hiện, truy đuổi và chiến đấu.
+- Responsive Web Game – tối ưu game cho máy tính, điện thoại Android và iPhone.
+- Game optimization – tối ưu FPS, bộ nhớ, GPU và hiệu năng máy yếu.
+
+Bạn đang tham gia phát triển dự án **ĐI TÙ 3D – PRISON LIFE 3D**.
+
+Website hiện tại:
+
+https://toiyeuban.onrender.com/
+
+Dự án đã có những chức năng hoạt động tương đối ổn định:
+- Người chơi có thể tham gia game.
+- Multiplayer tối đa 20 người.
+- Có hệ thống chat.
+- Có nhân vật tù nhân mặc quần áo màu cam.
+- Có hệ thống di chuyển và camera 3D.
+- Có HUD tiếng Việt.
+- Có các phím tương tác.
+- Có bản đồ nhà tù hiện tại.
+- Đang triển khai trên Render.
+
+**NHIỆM VỤ CỦA BẠN:** Nâng cấp toàn diện thế giới game, tạo ra một nhà tù 3D rộng lớn, chân thực, có nhiều tầng, nhiều khu vực, NPC quản giáo thông minh, vũ khí, nhiệm vụ và gameplay vượt ngục hấp dẫn.
+
+Đây phải là một bản nâng cấp thực sự trong dự án hiện tại, không phải một trang web mới hoặc một bản demo 3D độc lập.
+
+---
+
+# 2. NGUYÊN TẮC BẮT BUỘC – KHÔNG ĐƯỢC LÀM HỎNG GAME CŨ
+
+Trước khi chỉnh sửa, phải đọc và hiểu toàn bộ code hiện có.
+
+Đặc biệt kiểm tra:
+
+- frontend/index.html
+- frontend/main.js
+- frontend/styles.css
+- Các module JavaScript hiện có.
+- backend/server.js
+- Các file cấu hình multiplayer.
+- Các file quản lý bản đồ, camera, va chạm và nhân vật.
+- package.json và cấu hình Vite.
+- Các file dữ liệu và cấu hình khác.
+
+Đường dẫn thực tế có thể khác, vì vậy hãy tự kiểm tra cấu trúc dự án.
+
+Các tính năng sau phải được bảo toàn:
+
+1. Đăng nhập hoặc tạo hồ sơ nhân vật hiện tại.
+2. Multiplayer và hệ thống phòng chơi.
+3. Đồng bộ vị trí người chơi.
+4. Chat toàn nhà tù, chat gần và chat riêng nếu đã có.
+5. HUD tiếng Việt.
+6. Camera và điều khiển nhân vật.
+7. Tương tác phím E.
+8. Hệ thống tạm dừng.
+9. Hệ thống kết nối backend.
+10. Khả năng build và deploy trên Render.
+
+Không được xóa tính năng cũ chỉ vì muốn triển khai tính năng mới dễ hơn.
+
+Không tự ý thay đổi cổng server, cấu hình Render, endpoint hoặc giao thức Socket.IO nếu chưa thực sự cần thiết.
+
+Không tự ý thay toàn bộ main.js bằng một bản code mới khiến các chức năng đang chạy bị mất.
+
+Nếu cần chỉnh sửa kiến trúc, phải thực hiện từng phần, giữ khả năng tương thích với code cũ.
+
+---
+
+# 3. ƯU TIÊN SỐ 1: SỬA TRIỆT ĐỂ LỖI ĐIỆN THOẠI BỊ ÉP XOAY NGANG
+
+Đây là yêu cầu cực kỳ quan trọng.
+
+Hiện tại khi người chơi sử dụng điện thoại truy cập game, giao diện xuất hiện thông báo:
+
+"XOAY ĐIỆN THOẠI SANG NGANG"
+
+Tôi không muốn game bắt buộc người chơi phải xoay điện thoại mới được vào chơi.
+
+**Yêu cầu: Game phải hoạt động được cả màn hình dọc (Portrait) và màn hình ngang (Landscape).**
+
+## 3.1. Kiểm tra và loại bỏ nguyên nhân gây lỗi
+
+Hãy kiểm tra toàn bộ code để tìm:
+
+- CSS @media (orientation: portrait).
+- Lớp overlay yêu cầu xoay điện thoại.
+- Logic JavaScript kiểm tra orientation.
+- screen.orientation.lock('landscape').
+- Các sự kiện orientationchange.
+- Các điều kiện chặn game khi điện thoại đang ở chế độ dọc.
+- Canvas hoặc giao diện bị khóa kích thước ngang.
+- Các đoạn JavaScript tự động ẩn game trên màn hình dọc.
+
+Loại bỏ những cơ chế đang bắt buộc người chơi phải xoay ngang.
+
+Không chỉ ẩn dòng chữ thông báo mà phải sửa tận gốc logic gây ra tình trạng chặn chơi.
+
+Không sử dụng CSS rotate để xoay toàn bộ giao diện 90 độ nhằm giả lập màn hình ngang.
+
+## 3.2. Thiết kế giao diện điện thoại
+
+Khi mở game trên màn hình dọc:
+
+- Game vẫn hiển thị và chơi bình thường.
+- Canvas 3D tự điều chỉnh theo chiều rộng và chiều cao.
+- Camera tự cập nhật tỷ lệ khung hình.
+- HUD không bị tràn khỏi màn hình.
+- Các nút điều khiển bố trí hợp lý.
+- Chat có thể thu nhỏ hoặc mở rộng.
+- Bảng nhiệm vụ không che khuất nhân vật.
+- Menu, hồ sơ và kho đồ hiển thị vừa màn hình.
+- Không xuất hiện màn hình đen hoặc màn hình yêu cầu xoay máy.
+
+Khi xoay sang màn hình ngang:
+
+- Camera tự điều chỉnh.
+- Canvas tự resize.
+- HUD tự thay đổi bố cục.
+- Joystick và các nút điều khiển được sắp xếp lại.
+- Không phải tải lại trang hoặc thoát game.
+
+## 3.3. Hệ thống điều khiển cảm ứng
+
+Thiết kế bộ điều khiển dành riêng cho mobile:
+
+- Joystick ảo bên trái: di chuyển nhân vật 360 độ.
+- Nút chạy: giữ để chạy nhanh.
+- Nút nhảy.
+- Nút cúi.
+- Nút tương tác E.
+- Nút tấn công/bắn khi có vũ khí.
+- Nút ngắm khi sử dụng súng nếu phù hợp.
+- Nút mở chat.
+- Nút mở menu.
+
+Điều khiển phải có độ nhạy phù hợp, không bị giật và không khóa camera khi sử dụng joystick.
+
+Hỗ trợ thao tác vuốt bên phải màn hình để xoay góc nhìn.
+
+Không sử dụng Pointer Lock làm yêu cầu bắt buộc trên điện thoại.
+
+Chỉ chặn thao tác cuộn trang tại khu vực chơi game khi cần thiết, không làm hỏng các thao tác nhập liệu trong chat.
+
+## 3.4. Kỹ thuật responsive
+
+Phải kiểm tra và xử lý:
+
+- Meta viewport trong HTML.
+- CSS responsive.
+- Safe area trên iPhone bằng env(safe-area-inset-*).
+- Window resize.
+- Orientation change.
+- Visual viewport.
+- Three.js renderer.setSize().
+- Camera aspect và updateProjectionMatrix().
+- Pixel ratio có giới hạn để tránh quá tải GPU.
+
+Kiểm tra thực tế trên cả Android và iPhone nếu có điều kiện.
+
+**TIÊU CHÍ NGHIỆM THU:** Người chơi truy cập website bằng điện thoại ở chế độ dọc có thể tạo nhân vật, vào game, di chuyển, chat và tương tác mà không xuất hiện yêu cầu xoay ngang.
+
+Đây là giai đoạn phải hoàn thành và kiểm tra trước khi mở rộng bản đồ.
+
+---
+
+# 4. THIẾT KẾ LẠI TOÀN BỘ BẢN ĐỒ NHÀ TÙ 3D
+
+## 4.1. Phong cách thiết kế
+
+Tôi muốn nhà tù có phong cách:
+
+- Nhà tù hiện đại nhưng cũ kỹ.
+- Kiến trúc bê tông cốt thép.
+- Không gian rộng, có chiều sâu.
+- Hành lang dài.
+- Cửa sắt nặng.
+- Song sắt kim loại.
+- Hệ thống camera giám sát.
+- Đèn huỳnh quang.
+- Đèn cảnh báo đỏ.
+- Hệ thống cống thoát nước.
+- Nhiều khu vực có thể khám phá.
+
+Tham khảo phong cách kiến trúc nhà tù trong các game sinh tồn và vượt ngục 3D.
+
+Không tạo bản đồ chỉ bằng những khối hộp đơn giản đặt cạnh nhau.
+
+Cần có sự khác biệt về hình dáng kiến trúc, vật liệu, ánh sáng và cách bố trí không gian.
+
+## 4.2. Nhà tù gồm 9 tầng
+
+Xây dựng một tòa nhà giam lớn gồm 9 tầng.
+
+Mỗi tầng có:
+
+- Hành lang trung tâm.
+- Buồng giam hai bên.
+- Cầu thang bộ.
+- Hệ thống đèn.
+- Camera.
+- Cửa kiểm soát.
+- Khu vực tuần tra của quản giáo.
+- Biển chỉ dẫn tầng.
+- Hệ thống nhận diện Block và số buồng.
+
+Mỗi tầng có thể thiết kế khoảng 10–20 buồng mỗi bên nếu hiệu năng cho phép. Sử dụng cấu hình sinh phòng và InstancedMesh để tránh tạo quá nhiều đối tượng nặng.
+
+### Tầng 1 – Khu tiếp nhận
+
+- Sảnh chính.
+- Phòng tiếp nhận tù nhân.
+- Phòng quản giáo.
+- Phòng giám sát camera.
+- Phòng y tế.
+- Phòng kiểm soát cổng.
+- Khu vực kiểm tra an ninh.
+
+### Tầng 2 – Khu giam thường A
+
+- Buồng giam.
+- Hành lang dài.
+- Phòng vệ sinh chung.
+- Khu sinh hoạt.
+- Khu tuần tra.
+
+### Tầng 3 – Khu giam thường B
+
+- Các buồng giam.
+- Khu sinh hoạt.
+- Phòng lưu trữ.
+- Phòng quản giáo nhỏ.
+
+### Tầng 4 – Khu sinh hoạt tù nhân
+
+- Phòng ăn.
+- Phòng giải trí.
+- Khu sinh hoạt chung.
+- Khu tập thể dục.
+
+### Tầng 5 – Khu lao động
+
+- Xưởng lao động.
+- Kho hàng.
+- Phòng dụng cụ.
+- Khu vực vận chuyển vật phẩm.
+
+### Tầng 6 – Khu an ninh cao
+
+- Cửa thép dày.
+- Camera dày đặc.
+- Ánh sáng tối.
+- Quản giáo tuần tra nhiều hơn.
+- Phòng kiểm soát riêng.
+
+### Tầng 7 – Khu biệt giam
+
+- Các buồng giam biệt lập.
+- Hành lang kín.
+- Hệ thống khóa an ninh.
+- Phòng giám sát.
+
+### Tầng 8 – Khu bí mật
+
+- Phòng máy chủ.
+- Phòng điều khiển an ninh.
+- Kho vật phẩm đặc biệt.
+- Phòng lưu trữ dữ liệu.
+- Khu vực nhiệm vụ bí mật.
+
+### Tầng 9 – Khu giám đốc nhà tù
+
+- Văn phòng giám đốc.
+- Phòng họp.
+- Phòng điều hành.
+- Phòng lưu trữ hồ sơ.
+- Khu vực chứa thẻ từ đặc biệt.
+- Cửa truy cập hệ thống điều khiển nhà tù.
+
+Mỗi tầng phải có thiết kế riêng, không chỉ sao chép nguyên một tầng rồi thay số tầng.
+
+## 4.3. Hệ thống buồng giam
+
+Mỗi buồng giam được thiết kế với:
+
+- Cửa song sắt có thể mở.
+- Giường tầng.
+- Nệm và chăn.
+- Bàn nhỏ.
+- Bồn cầu.
+- Chậu rửa.
+- Bóng đèn.
+- Kệ để đồ.
+- Biển số buồng giam PR001, PR002...
+- Một vài đồ vật trang trí.
+
+Người chơi bắt đầu tại:
+
+BLOCK C – BUỒNG 04.
+
+Khi người chơi di chuyển sang khu vực khác, HUD tự cập nhật:
+
+- BLOCK A / BUỒNG 05.
+- BLOCK B / BUỒNG 12.
+- BLOCK C / BUỒNG 04.
+- TẦNG 6 – KHU AN NINH CAO.
+
+Việc xác định vị trí phải dựa vào tọa độ và dữ liệu bản đồ thực tế.
+
+---
+
+# 5. CẦU THANG VÀ THANG MÁY
+
+## 5.1. Cầu thang
+
+Thiết kế cầu thang bộ tại hai đầu tòa nhà.
+
+Yêu cầu:
+
+- Có bậc thang.
+- Có tay vịn.
+- Có chiếu nghỉ.
+- Có lan can.
+- Có tường bao.
+- Có biển báo số tầng.
+- Người chơi có thể lên xuống giữa 9 tầng.
+
+Hệ thống va chạm phải khớp với bậc và mặt sàn.
+
+Không để nhân vật bị kẹt tại cầu thang hoặc xuyên qua sàn.
+
+## 5.2. Thang máy
+
+Thiết kế một thang máy lớn tại trung tâm nhà tù.
+
+Có:
+
+- Cửa thang máy mở và đóng.
+- Nút chọn tầng 1–9.
+- Màn hình hiển thị số tầng.
+- Đèn báo.
+- Âm thanh khi tới tầng.
+- Hiệu ứng chuyển động.
+- Hiệu ứng rung nhẹ khi di chuyển.
+
+Người chơi nhấn E để tương tác.
+
+Một số tầng yêu cầu thẻ từ.
+
+Thang máy phải di chuyển đúng vị trí, không dịch chuyển nhân vật tức thời một cách thiếu tự nhiên.
+
+Multiplayer phải đồng bộ trạng thái thang máy và người chơi bên trong.
+
+---
+
+# 6. KHU TRẠI GIAM BÊN NGOÀI
+
+Đây là phần cực kỳ quan trọng.
+
+Cánh cổng đen lớn ở cuối sân hiện tại phải được phát triển thành cổng chính của nhà tù.
+
+Khi cánh cổng mở ra, người chơi nhìn thấy một khu trại giam rộng lớn bên ngoài.
+
+Không được chỉ đặt một vài khối hộp làm cảnh.
+
+Phải xây dựng thành một khu vực 3D thực sự có thể đi vào, di chuyển và khám phá.
+
+## 6.1. Sân trong
+
+Bao gồm:
+
+- Sân bê tông rộng.
+- Tường rào cao.
+- Dây thép gai.
+- Camera an ninh.
+- Tháp canh.
+- Hệ thống đèn pha.
+- Chốt bảo vệ.
+- Cổng kiểm soát.
+- Biển cảnh báo.
+- Xe tuần tra.
+
+## 6.2. Các công trình bên ngoài
+
+Tạo các khu vực:
+
+1. Nhà ăn lớn.
+2. Sân bóng rổ.
+3. Sân bóng đá nhỏ.
+4. Khu tập thể dục.
+5. Xưởng lao động.
+6. Nhà kho.
+7. Phòng phát điện.
+8. Trạm y tế.
+9. Khu quản giáo.
+10. Bãi đậu xe.
+11. Chốt an ninh.
+12. Tháp canh.
+
+Các khu vực này cần có vật thể, nội thất và lối đi riêng.
+
+## 6.3. Khu vực bên ngoài tường rào
+
+Sau khi vượt qua khu sân trong, người chơi tiếp tục khám phá:
+
+- Con đường đất.
+- Rừng cây.
+- Đồi núi.
+- Cỏ.
+- Đá.
+- Sương mù nhẹ.
+- Hệ thống ánh sáng ban đêm.
+- Một vài công trình bỏ hoang.
+- Đường dẫn đến khu vực thoát cuối cùng.
+
+Có thể sử dụng bầu trời hoàng hôn hoặc ban đêm để tạo không khí điện ảnh.
+
+## 6.4. Cổng thoát cuối cùng
+
+Thiết kế thêm một cổng lớn bên ngoài cùng.
+
+Có thể sử dụng:
+
+- Thẻ từ.
+- Chìa khóa.
+- Nhiệm vụ đặc biệt.
+- Cơ chế mở khóa trong game.
+
+Khi người chơi vượt qua được cổng cuối cùng, hiển thị màn hình:
+
+**VƯỢT NGỤC THÀNH CÔNG!**
+
+Kèm hiệu ứng âm thanh và thông báo hoàn thành nhiệm vụ.
+
+---
+
+# 7. NPC QUẢN GIÁO – HỆ THỐNG AI
+
+Thêm các NPC quản giáo xuất hiện trong nhà tù.
+
+Mục tiêu có khoảng 15–30 quản giáo trên toàn bản đồ, nhưng số NPC hoạt động đồng thời phải được điều chỉnh theo hiệu năng.
+
+## 7.1. Ngoại hình
+
+Quản giáo phải khác biệt rõ ràng với tù nhân:
+
+- Đồng phục bảo vệ.
+- Mũ.
+- Bộ đàm.
+- Thắt lưng dụng cụ.
+- Dùi cui hoặc vũ khí trong game.
+- Hoạt ảnh đi bộ và chạy.
+- Biểu cảm phù hợp.
+
+Không sử dụng nhân vật hình hộp đơn giản.
+
+## 7.2. Hành vi AI
+
+Xây dựng state machine:
+
+**PATROL – TUẦN TRA**
+
+Đi theo tuyến đường đã thiết lập.
+
+**SUSPICIOUS – NGHI NGỜ**
+
+Khi nghe tiếng động hoặc phát hiện người chơi có hành động bất thường.
+
+**CHASE – TRUY ĐUỔI**
+
+Phát hiện người chơi và bắt đầu truy đuổi.
+
+**ATTACK – TẤN CÔNG**
+
+Khi người chơi chống trả hoặc không tuân thủ cơ chế trong game.
+
+**CAPTURE – BẮT GIỮ**
+
+Khi người chơi bị khống chế.
+
+**RETURN – TRỞ VỀ**
+
+Quay về tuyến đường tuần tra ban đầu.
+
+## 7.3. Khả năng phát hiện
+
+NPC cần có:
+
+- Tầm nhìn.
+- Góc nhìn hình nón.
+- Raycast kiểm tra vật cản.
+- Khoảng cách phát hiện.
+- Khả năng nghe tiếng chạy.
+- Khả năng nghe âm thanh trong game.
+- Phản ứng khi thấy người chơi cầm vật phẩm bị cấm.
+
+Không để NPC nhìn xuyên tường.
+
+## 7.4. Hệ thống báo động
+
+Khi quản giáo phát hiện người chơi:
+
+- Còi báo động vang lên.
+- Đèn đỏ nhấp nháy.
+- Các quản giáo gần đó nhận tín hiệu.
+- Cửa an ninh có thể khóa.
+- Người chơi bị đánh dấu đang bị truy nã trong HUD.
+- Quản giáo tăng cường truy đuổi.
+
+Khi thoát khỏi tầm phát hiện, NPC có thể tìm kiếm trong một khoảng thời gian rồi quay về tuần tra.
+
+## 7.5. Hệ thống bắt giữ
+
+Nếu người chơi bị bắt:
+
+- Có hoạt ảnh bị khống chế.
+- Camera chuyển cảnh phù hợp.
+- Nhân vật được đưa về khu giam.
+- Có thể mất vật phẩm nhiệm vụ hoặc một phần tiến độ theo luật chơi.
+- Hiển thị thông báo bị bắt.
+
+NPC phải tương tác với cầu thang và các khu vực bản đồ.
+
+Không yêu cầu AI phải tính toán NavMesh phức tạp ngay từ đầu. Có thể dùng waypoint graph và đường đi định sẵn nếu phù hợp với kiến trúc game hiện tại.
+
+---
+
+# 8. VŨ KHÍ VÀ GAMEPLAY CHIẾN ĐẤU
+
+Xây dựng hệ thống vũ khí mang tính giải trí trong game.
+
+## 8.1. Các loại vũ khí
+
+- Súng lục.
+- Shotgun.
+- Súng trường.
+
+Các loại vũ khí cần có mô hình 3D, hoạt ảnh cầm súng và âm thanh riêng.
+
+## 8.2. Hệ thống sử dụng
+
+- Nhặt vũ khí.
+- Bỏ vũ khí.
+- Chuyển đổi vũ khí.
+- Kiểm tra đạn.
+- Nạp đạn bằng phím R.
+- Bắn bằng chuột hoặc nút cảm ứng.
+- Hiệu ứng giật.
+- Hiệu ứng đầu nòng.
+- Âm thanh bắn.
+- Hiệu ứng va chạm.
+
+## 8.3. Hệ thống máu
+
+Tạo:
+
+- Máu người chơi.
+- Máu NPC.
+- Thanh máu.
+- Trạng thái bị thương.
+- Hồi sinh.
+- Hiệu ứng khi trúng đòn.
+
+Các hành động quan trọng về sát thương và đạn phải được kiểm tra ở server để tránh gian lận.
+
+Không để client tự gửi kết quả sát thương tùy ý.
+
+## 8.4. Hệ thống vật phẩm
+
+Thêm các vật phẩm có thể nhặt:
+
+- Keycard.
+- Chìa khóa.
+- Kìm cắt dây trong game.
+- Bộ đàm.
+- Thuốc hồi máu.
+- Đạn.
+- Vũ khí.
+- Giấy thông hành.
+- Thẻ kiểm soát an ninh.
+
+Hiển thị tên và thông tin vật phẩm khi người chơi tiến lại gần.
+
+Nhấn E để nhặt hoặc sử dụng.
+
+---
+
+# 9. HỆ THỐNG NHIỆM VỤ VÀ VƯỢT NGỤC
+
+Game phải có một chuỗi nhiệm vụ rõ ràng.
+
+HUD phải có mục tiêu hiện tại.
+
+Chuỗi nhiệm vụ:
+
+**NHIỆM VỤ 01 – RỜI KHỎI BUỒNG GIAM**
+
+Tìm cách mở cửa buồng giam.
+
+**NHIỆM VỤ 02 – TÌM VẬT PHẨM**
+
+Khám phá phòng và hành lang để tìm vật phẩm cần thiết.
+
+**NHIỆM VỤ 03 – LẤY THẺ TỪ**
+
+Tìm thẻ từ ở khu vực thích hợp.
+
+**NHIỆM VỤ 04 – XUỐNG TẦNG 1**
+
+Sử dụng cầu thang hoặc thang máy.
+
+**NHIỆM VỤ 05 – TIẾP CẬN KHO AN NINH**
+
+Tìm cách tiếp cận khu vực có vật phẩm hỗ trợ.
+
+**NHIỆM VỤ 06 – VƯỢT QUA QUẢN GIÁO**
+
+Có thể chọn lén lút, đánh lạc hướng hoặc chiến đấu trong game.
+
+**NHIỆM VỤ 07 – MỞ CỔNG CHÍNH**
+
+Tìm cách mở cổng nhà tù.
+
+**NHIỆM VỤ 08 – VƯỢT QUA SÂN TRẠI GIAM**
+
+Tránh camera, bảo vệ và tháp canh.
+
+**NHIỆM VỤ 09 – THOÁT KHỎI NHÀ TÙ**
+
+Tới cổng cuối cùng để hoàn thành game.
+
+Các nhiệm vụ phải được cập nhật theo hành động thực tế.
+
+Không để nhiệm vụ hoàn thành khi người chơi chưa thực hiện điều kiện.
+
+Có thể bổ sung nhiệm vụ phụ để tăng khả năng khám phá.
+
+---
+
+# 10. HỆ THỐNG TƯƠNG TÁC THẾ GIỚI
+
+Hãy biến nhà tù thành thế giới có thể tương tác.
+
+Các vật thể cần tương tác:
+
+- Cửa buồng giam.
+- Cửa hành lang.
+- Cổng lớn.
+- Thang máy.
+- Bảng điều khiển.
+- Camera.
+- Công tắc điện.
+- Tủ đồ.
+- Kho vật phẩm.
+- Hộp điện.
+- Bàn làm việc.
+- Các vật phẩm nhiệm vụ.
+
+Khi đến gần vật thể, hiển thị gợi ý:
+
+[E] TƯƠNG TÁC
+
+Trên điện thoại hiển thị nút TƯƠNG TÁC tương ứng.
+
+Mỗi vật thể phải có trạng thái:
+
+- Đang khóa.
+- Đang mở.
+- Đang đóng.
+- Bị vô hiệu hóa.
+- Cần thẻ từ.
+- Không đủ điều kiện.
+
+Đối với multiplayer, trạng thái của các vật thể quan trọng phải được đồng bộ.
+
+---
+
+# 11. THIẾT KẾ HUD VÀ GIAO DIỆN
+
+Giữ phong cách nhận diện hiện tại nhưng nâng cấp thẩm mỹ.
+
+Phong cách UI:
+
+- Hiện đại.
+- Tối màu.
+- Chủ đề nhà tù.
+- Có cảm giác điện ảnh.
+- Các bảng giao diện gọn gàng.
+- Chữ tiếng Việt dễ đọc.
+- Hiệu ứng chuyển động nhẹ.
+
+Bổ sung:
+
+1. HUD máu.
+2. HUD nhiệm vụ.
+3. HUD tầng hiện tại.
+4. HUD Block và buồng giam.
+5. HUD vũ khí.
+6. HUD số lượng đạn.
+7. HUD trạng thái báo động.
+8. HUD tương tác.
+9. HUD vật phẩm.
+10. Bản đồ nhỏ hoặc minimap nếu phù hợp.
+11. Menu tạm dừng.
+12. Menu cài đặt.
+13. Cài đặt âm lượng.
+14. Cài đặt chất lượng đồ họa.
+
+Không để HUD che khuất tầm nhìn.
+
+Trên mobile, giao diện cần được thiết kế riêng thay vì thu nhỏ giao diện desktop một cách máy móc.
+
+---
+
+# 12. NÂNG CẤP ĐỒ HỌA 3D
+
+Tôi muốn game có chất lượng hình ảnh đẹp và chân thực hơn.
+
+## Ánh sáng
+
+- Ambient Light.
+- Directional Light.
+- Point Light.
+- Spotlight.
+- Ánh sáng đèn huỳnh quang.
+- Đèn đỏ báo động.
+- Ánh sáng ban đêm.
+
+Sử dụng shadow có giới hạn để tránh giảm FPS.
+
+## Vật liệu
+
+Tạo vật liệu riêng cho:
+
+- Tường bê tông.
+- Sàn xi măng.
+- Kim loại.
+- Song sắt.
+- Cửa thép.
+- Kính.
+- Gỗ.
+- Đất.
+- Cỏ.
+- Đá.
+
+Có thể sử dụng texture procedural hoặc texture dung lượng nhẹ.
+
+## Hiệu ứng môi trường
+
+- Fog.
+- Bloom nhẹ.
+- Color grading phù hợp.
+- Tone mapping.
+- Hạt bụi nhẹ.
+- Đèn nhấp nháy.
+- Sương mù.
+- Hiệu ứng thời tiết nếu phù hợp.
+
+Không lạm dụng hiệu ứng khiến game trở nên nặng.
+
+## Âm thanh
+
+Bổ sung:
+
+- Tiếng bước chân.
+- Tiếng cửa sắt.
+- Tiếng cửa mở.
+- Tiếng thang máy.
+- Tiếng bộ đàm.
+- Tiếng còi báo động.
+- Tiếng súng.
+- Tiếng môi trường.
+- Nhạc nền căng thẳng.
+
+Âm thanh có thể bật/tắt trong cài đặt.
+
+---
+
+# 13. HỆ THỐNG MULTIPLAYER VÀ ĐỒNG BỘ
+
+Đây là phần phải được bảo vệ cẩn thận.
+
+Giữ tối đa 20 người chơi hiện tại.
+
+Mọi người chơi phải nhìn thấy:
+
+- Nhân vật của nhau.
+- Vị trí của nhau.
+- Hành động cơ bản.
+- Trạng thái tương tác quan trọng.
+- Trạng thái cửa.
+- Trạng thái thang máy.
+- Trạng thái báo động.
+- NPC quản giáo.
+- Các sự kiện gameplay liên quan.
+
+Ưu tiên server authoritative đối với:
+
+- Vị trí và trạng thái quan trọng.
+- Sát thương.
+- Số lượng đạn.
+- Nhặt vật phẩm.
+- Mở khóa.
+- Trạng thái nhiệm vụ cần đồng bộ.
+- AI quản giáo.
+
+Sử dụng tần suất gửi dữ liệu phù hợp, có thể bắt đầu ở mức 10–15 Hz cho các đối tượng cần đồng bộ.
+
+Client cần nội suy chuyển động để tránh giật.
+
+Không gửi quá nhiều dữ liệu không cần thiết qua Socket.IO.
+
+Phải xử lý:
+
+- Người chơi thoát game.
+- Người chơi mất kết nối.
+- Vào lại phòng.
+- NPC bị tiêu diệt hoặc bị bắt.
+- Người chơi chết và hồi sinh.
+- Trạng thái thế giới khi người mới tham gia.
+
+Không để người chơi mới tham gia nhìn thấy một trạng thái thế giới khác hoàn toàn với người đang chơi.
+
+---
+
+# 14. TỐI ƯU HIỆU NĂNG
+
+Không được chỉ tập trung vào hình ảnh đẹp mà bỏ qua hiệu năng.
+
+Mục tiêu là chạy mượt trên:
+
+- Máy tính cấu hình trung bình.
+- Laptop phổ thông.
+- Điện thoại Android.
+- iPhone.
+- Render free hoặc gói hosting có tài nguyên giới hạn.
+
+Áp dụng:
+
+- InstancedMesh cho song sắt, giường, đèn và vật thể lặp lại.
+- Geometry dùng chung.
+- Material dùng chung khi phù hợp.
+- Frustum culling.
+- LOD.
+- Object pooling.
+- Texture kích thước hợp lý.
+- Giới hạn shadow map.
+- Giới hạn DPR trên mobile.
+- Giới hạn số lượng hiệu ứng đồng thời.
+- Chỉ cập nhật AI ở các khu vực phù hợp.
+- Chỉ cập nhật chi tiết những khu vực gần người chơi.
+- Phân chia bản đồ thành zone/chunk.
+- Tải và giải phóng tài nguyên có kiểm soát.
+
+Không tạo hàng nghìn mesh và vật liệu riêng biệt không cần thiết.
+
+Mục tiêu tham khảo:
+
+- Desktop: 50–60 FPS khi điều kiện phần cứng cho phép.
+- Mobile: 30–60 FPS tùy thiết bị.
+
+Không được tuyên bố đạt FPS nếu chưa kiểm tra thực tế.
+
+Nếu máy yếu, có chế độ đồ họa thấp, trung bình và cao.
+
+---
+
+# 15. KIẾN TRÚC CODE VÀ CẤU TRÚC MODULE
+
+Không nhồi thêm tất cả chức năng vào main.js hoặc server.js.
+
+Hãy tách module rõ ràng, nhưng phải dựa vào kiến trúc thực tế hiện tại.
+
+Có thể tổ chức theo hướng:
+
+frontend/
+  index.html
+  main.js
+  styles.css
+
+  src/
+    core/
+      game.js
+      camera.js
+      renderer.js
+      input.js
+      mobileControls.js
+
+    map/
+      building.js
+      floors.js
+      cells.js
+      stairs.js
+      elevator.js
+      outside.js
+      collision.js
+
+    npc/
+      guard.js
+      guardAI.js
+      pathfinding.js
+
+    player/
+      player.js
+      controller.js
+      health.js
+      inventory.js
+
+    weapons/
+      weapons.js
+      combat.js
+
+    quests/
+      questManager.js
+      questData.js
+
+    interaction/
+      interactionManager.js
+      doors.js
+
+    audio/
+      audioManager.js
+
+    ui/
+      hud.js
+      mobileHUD.js
+      minimap.js
+
+    net/
+      socket.js
+      sync.js
+
+  data/
+    prisonMap.json
+    floors.json
+    quests.json
+    guards.json
+
+backend/
+  server.js
+
+  src/
+    gameState.js
+    playerManager.js
+    npcManager.js
+    interactionManager.js
+    combatManager.js
+    questManager.js
+
+Đây là cấu trúc tham khảo, không bắt buộc phải di chuyển toàn bộ code cũ theo đúng cấu trúc trên nếu việc đó gây rủi ro.
+
+Có comment tiếng Việt ngắn gọn ở các phần quan trọng.
+
+---
+
+# 16. QUY TRÌNH LÀM VIỆC – BẮT BUỘC
+
+Không triển khai toàn bộ hệ thống trong một lần.
+
+Hãy chia thành từng giai đoạn nhỏ.
+
+## GIAI ĐOẠN 0 – KIỂM TRA DỰ ÁN
+
+- Đọc toàn bộ code.
+- Hiểu kiến trúc frontend và backend.
+- Kiểm tra hệ thống multiplayer.
+- Kiểm tra cách dựng bản đồ.
+- Kiểm tra camera và va chạm.
+- Kiểm tra lỗi mobile.
+- Kiểm tra npm run build.
+- Kiểm tra trạng thái Git.
+
+Sau đó báo cáo:
+
+1. Kiến trúc hiện tại.
+2. Những tính năng đang hoạt động.
+3. Những phần có thể tái sử dụng.
+4. Nguyên nhân gây lỗi xoay ngang.
+5. Những file cần sửa.
+6. Những file cần tạo.
+7. Rủi ro khi nâng cấp.
+8. Kế hoạch triển khai.
+
+**Ở giai đoạn này chưa tự ý sửa code. Hãy đưa kế hoạch để tôi xem xét trước.**
+
+## GIAI ĐOẠN 1 – SỬA LỖI MOBILE
+
+- Sửa cơ chế bắt buộc xoay ngang.
+- Hỗ trợ portrait và landscape.
+- Xây dựng joystick.
+- Xây dựng nút cảm ứng.
+- Responsive HUD.
+- Sửa resize canvas và camera.
+- Kiểm tra chat trên điện thoại.
+- Kiểm tra điều khiển nhân vật.
+- Build thành công.
+
+Phải hoàn thành giai đoạn này trước khi mở rộng map.
+
+## GIAI ĐOẠN 2 – XÂY DỰNG BẢN ĐỒ NHÀ TÙ MỚI
+
+- Xây dựng tòa nhà 9 tầng.
+- Xây dựng hành lang.
+- Xây dựng buồng giam.
+- Xây dựng cầu thang.
+- Xây dựng thang máy.
+- Xây dựng các khu vực riêng biệt.
+- Xây dựng hệ thống va chạm.
+- Đặt lại điểm xuất hiện người chơi.
+- Kiểm tra toàn bộ đường đi.
+
+Người chơi phải có thể đi từ tầng 1 đến tầng 9 một cách thực sự.
+
+## GIAI ĐOẠN 3 – KHU TRẠI GIAM BÊN NGOÀI
+
+- Xây dựng sân trong.
+- Xây dựng cổng chính.
+- Xây dựng các công trình.
+- Xây dựng hàng rào.
+- Xây dựng tháp canh.
+- Xây dựng khu rừng và đường thoát.
+- Kết nối tất cả khu vực thành một thế giới liên tục.
+
+## GIAI ĐOẠN 4 – NPC QUẢN GIÁO
+
+- Tạo mô hình NPC.
+- Hoạt ảnh.
+- Tuần tra.
+- Phát hiện.
+- Truy đuổi.
+- Bắt giữ.
+- Đồng bộ multiplayer.
+
+## GIAI ĐOẠN 5 – VŨ KHÍ VÀ VẬT PHẨM
+
+- Hệ thống nhặt đồ.
+- Inventory.
+- Vũ khí.
+- Đạn.
+- Nạp đạn.
+- Sát thương.
+- Máu.
+- Hồi sinh.
+
+## GIAI ĐOẠN 6 – NHIỆM VỤ VÀ VƯỢT NGỤC
+
+- Tạo chuỗi nhiệm vụ.
+- Tạo vật phẩm nhiệm vụ.
+- Tạo điều kiện mở cửa.
+- Tạo hệ thống báo động.
+- Tạo điều kiện thoát khỏi nhà tù.
+- Hiệu ứng chiến thắng.
+
+## GIAI ĐOẠN 7 – HOÀN THIỆN VÀ TỐI ƯU
+
+- Nâng cấp đồ họa.
+- Âm thanh.
+- HUD.
+- Tối ưu hiệu năng.
+- Kiểm tra multiplayer.
+- Kiểm tra mobile.
+- Kiểm tra desktop.
+- Kiểm tra build.
+- Kiểm tra deploy Render.
+
+Sau mỗi giai đoạn phải báo cáo:
+
+- Đã hoàn thành những gì.
+- Những file đã sửa.
+- Những file đã tạo.
+- Những chức năng đã kiểm tra.
+- Những lỗi đã phát hiện.
+- Cách kiểm tra lại.
+- Kết quả npm run build.
+
+Chỉ chuyển sang giai đoạn tiếp theo khi giai đoạn hiện tại đã được kiểm tra và hoạt động ổn định.
+
+Nếu có Git, tạo commit riêng cho từng giai đoạn với message dễ hiểu. Không tự ý push hoặc thay đổi cấu hình repository khi chưa được phép.
+
+Không được báo cáo rằng một tính năng đã hoàn thành nếu thực tế mới chỉ tạo giao diện hoặc code khung.
+
+---
+
+# 17. TIÊU CHÍ NGHIỆM THU CUỐI CÙNG
+
+Khi hoàn thành, game phải đạt các yêu cầu:
+
+**VỀ BẢN ĐỒ**
+
+- Có đủ 9 tầng.
+- Có thể di chuyển giữa các tầng.
+- Có cầu thang.
+- Có thang máy.
+- Có nhiều buồng giam.
+- Có khu nhà tù bên ngoài.
+- Có sân, tháp canh, nhà ăn và các khu vực phụ.
+- Có cổng chính và cổng thoát cuối cùng.
+
+**VỀ GAMEPLAY**
+
+- Có NPC quản giáo.
+- NPC có thể tuần tra.
+- NPC có thể phát hiện và truy đuổi.
+- Có hệ thống vũ khí.
+- Có hệ thống vật phẩm.
+- Có hệ thống nhiệm vụ.
+- Có hệ thống báo động.
+- Có thể thực hiện một lượt vượt ngục hoàn chỉnh.
+
+**VỀ MULTIPLAYER**
+
+- Tối đa 20 người chơi.
+- Chat vẫn hoạt động.
+- Nhân vật vẫn đồng bộ.
+- Các tương tác quan trọng được đồng bộ.
+- Không xảy ra lỗi nghiêm trọng khi người chơi vào hoặc thoát game.
+
+**VỀ MOBILE**
+
+- Chơi được màn hình dọc.
+- Chơi được màn hình ngang.
+- Không bắt buộc xoay ngang.
+- Có joystick cảm ứng.
+- Có đầy đủ nút điều khiển.
+- Không bị vỡ giao diện.
+- Không bị mất camera hoặc điều khiển khi xoay màn hình.
+
+**VỀ TRIỂN KHAI**
+
+- npm run build thành công.
+- Backend khởi động bình thường.
+- Không có lỗi JavaScript nghiêm trọng.
+- Không làm hỏng cấu hình Render.
+- Không để lộ các thông tin bí mật hoặc biến môi trường.
+
+---
+
+# 18. YÊU CẦU CUỐI CÙNG
+
+Tôi không cần một bản demo sơ sài.
+
+Tôi muốn phát triển một game nhà tù 3D có thế giới rộng lớn, có chiều sâu, có nhiều hoạt động và mang cảm giác như một trò chơi thực sự.
+
+Hãy ưu tiên:
+
+1. Chất lượng trải nghiệm người chơi.
+2. Bản đồ rộng và có chiều sâu.
+3. Kiến trúc nhà tù đẹp và chân thực.
+4. Gameplay vượt ngục hấp dẫn.
+5. NPC có hành vi thông minh.
+6. Multiplayer ổn định.
+7. Mobile hoạt động hoàn chỉnh.
+8. Hiệu năng tốt.
+
+Hãy chủ động đưa ra những cải tiến hợp lý mà tôi chưa đề cập, chẳng hạn như sự kiện báo động toàn trại, nhiệm vụ phụ, hệ thống cấp độ tù nhân, khu vực bí mật, vật phẩm hiếm, chế độ ẩn nấp và các tình huống ngẫu nhiên.
+
+Tuy nhiên, không được tự ý triển khai những tính năng lớn làm ảnh hưởng đến tính ổn định của game.
+
+Mọi tính năng mới phải có gameplay thực tế, không chỉ là mô hình trang trí hoặc nút bấm không có chức năng.
+
+**BẮT ĐẦU NGAY TỪ GIAI ĐOẠN 0: ĐỌC CODE HIỆN TẠI, PHÂN TÍCH DỰ ÁN VÀ ĐƯA RA KẾ HOẠCH CHI TIẾT. CHƯA SỬA CODE CHO ĐẾN KHI TÔI ĐỒNG Ý VỚI KẾ HOẠCH.**
+
+# BỐI CẢNH VÀ LỊCH SỬ DỰ ÁN ĐI TÙ 3D – ĐỌC KỸ TRƯỚC KHI LÀM VIỆC
+
+Bạn đang tiếp tục phát triển một dự án game đã tồn tại, không phải dự án mới.
+
+Website:
+https://toiyeuban.onrender.com/
+
+GitHub đã có các commit trước:
+- a9177a3
+- 6c8021e
+- ca26a2f
+
+Theo trạng thái deploy gần nhất do chủ dự án cung cấp, commit ca26a2f đang Live trên Render.
+
+Hãy kiểm tra HEAD, Git history, nhánh hiện tại và trạng thái working tree trước khi thực hiện bất kỳ thay đổi nào.
+
+## A. NHỮNG CHỨC NĂNG ĐÃ ĐƯỢC PHÁT TRIỂN
+
+### 1. Multiplayer
+- Hỗ trợ tối đa 20 người chơi.
+- Đồng bộ vị trí nhân vật.
+- Kết nối bằng Socket.IO.
+- Có quản lý người chơi và phòng chơi.
+
+### 2. Chat multiplayer
+Đã triển khai hệ thống chat gồm:
+- Chat toàn nhà tù.
+- Chat gần.
+- Chat riêng.
+- Lịch sử tin nhắn phân trang.
+- Chặn người chơi.
+- Báo cáo tin nhắn.
+- Xóa tin nhắn của người gửi.
+- Giao diện chat trên desktop và mobile.
+
+Backend đã có tích hợp PostgreSQL để lưu trữ dữ liệu chat.
+
+Tình trạng hiện tại:
+- Endpoint health đang báo `chat:false` trên Render.
+- Nguyên nhân cần kiểm tra, trong đó cần xác minh cấu hình `DATABASE_URL`, khả năng kết nối PostgreSQL và trạng thái khởi tạo database.
+- PostgreSQL chưa được xác nhận hoạt động đầy đủ trên môi trường Render.
+
+YÊU CẦU:
+Không tạo lại hệ thống chat.
+Không xóa hoặc thay thế các chức năng chat hiện có.
+Không tạo thêm một hệ thống database trùng lặp.
+Không tự ý thay đổi cấu trúc bảng hoặc xóa dữ liệu hiện tại.
+
+Hãy kiểm tra code tích hợp PostgreSQL trước, xác định chính xác nguyên nhân `chat:false`, sau đó đưa ra hướng xử lý.
+
+Nếu thiếu PostgreSQL hoặc DATABASE_URL, hãy hướng dẫn chủ dự án cấu hình. Không tự ý tạo dịch vụ trả phí hoặc phát sinh chi phí.
+
+Không bao giờ hardcode mật khẩu database hoặc đưa thông tin bí mật vào frontend, GitHub hay log công khai.
+
+### 3. Bảo mật
+Dự án đã được bổ sung:
+- Kiểm tra Origin.
+- Security headers.
+- Giới hạn kết nối và sự kiện Socket.IO.
+- Logging.
+- Kiểm tra dữ liệu movement cơ bản tại server.
+- Kiểm tra interaction.
+- Cơ chế bảo vệ backend ở mức hiện tại.
+
+Không được xóa những cơ chế này để tiện phát triển các tính năng mới.
+
+Khi thêm vũ khí, sát thương, NPC, vật phẩm và nhiệm vụ, phải tiếp tục kiểm tra dữ liệu quan trọng phía server.
+
+### 4. Điều khiển điện thoại
+Dự án đã từng được chỉnh sửa để:
+- Hỗ trợ điều khiển cảm ứng.
+- Có giao diện mobile.
+- Tự yêu cầu fullscreen.
+- Thử khóa hướng màn hình sang ngang.
+- Hiển thị lời nhắc xoay ngang nếu không khóa được hướng.
+
+Tuy nhiên, chủ dự án hiện yêu cầu thay đổi cách hoạt động.
+
+YÊU CẦU MỚI:
+- Không bắt buộc xoay điện thoại sang ngang.
+- Không chặn game nếu điện thoại đang ở chế độ dọc.
+- Không hiển thị overlay yêu cầu xoay ngang.
+- Cho phép chơi ở cả Portrait và Landscape.
+- Giữ và nâng cấp joystick cảm ứng hiện có.
+- Giữ các chức năng điều khiển mobile đang hoạt động tốt.
+- Không xóa điều khiển touch để thay thế bằng một hệ thống mới nếu không cần thiết.
+
+Phải tìm nguyên nhân thật sự khiến game bắt buộc xoay ngang và xử lý tận gốc.
+
+Đặc biệt kiểm tra:
+- screen.orientation.lock().
+- Fullscreen API.
+- Các sự kiện orientationchange.
+- CSS orientation media query.
+- Các lớp overlay.
+- Logic kiểm tra chiều rộng và chiều cao.
+- Các điều kiện chặn người chơi vào game.
+
+Không được chỉ ẩn dòng chữ "XOAY ĐIỆN THOẠI SANG NGANG" trong khi game vẫn bị khóa.
+
+Không sử dụng CSS rotate để xoay toàn bộ game giả lập màn hình ngang.
+
+Game phải có khả năng điều chỉnh camera, renderer, HUD và touch controls theo cả hai hướng màn hình.
+
+### 5. Kiểm thử và triển khai
+Những việc đã được thực hiện trước đây:
+- Kiểm tra build.
+- Kiểm tra PostgreSQL local.
+- Kiểm tra Chromium giả lập.
+- Kiểm tra website trên Render.
+
+Tuy nhiên:
+- Chưa có kiểm thử trên điện thoại vật lý.
+- Chat trên Render chưa được xác nhận hoạt động do health báo chat:false.
+
+Lệnh build:
+`npm run build`
+
+Build Command trên Render:
+`npm ci && npm run build`
+
+Start Command:
+`npm run start:server`
+
+Không tự ý thay đổi hai lệnh trên nếu chưa có lý do kỹ thuật cụ thể.
+
+## B. QUY TẮC BẢO VỆ CODE HIỆN TẠI
+
+1. Luôn đọc code trước khi chỉnh sửa.
+2. Không ghi đè hàng loạt file đang hoạt động.
+3. Không xóa tính năng multiplayer, chat, bảo mật hoặc điều khiển cảm ứng.
+4. Không thay đổi cấu trúc server nếu chưa phân tích ảnh hưởng.
+5. Không reset Git.
+6. Không xóa commit cũ.
+7. Không sử dụng force push.
+8. Không thay đổi biến môi trường trên Render khi chưa được chủ dự án cho phép.
+9. Không làm mất dữ liệu PostgreSQL.
+10. Không khẳng định tính năng đã hoàn thành nếu chưa kiểm thử.
+
+Nếu phát hiện vấn đề trong code cũ, hãy báo cáo trước khi sửa.
+
+## C. NGUYÊN TẮC LÀM VIỆC
+
+Chủ dự án yêu cầu bạn chỉ triển khai đúng phạm vi được giao.
+
+Không tự ý mở rộng phạm vi hoặc thực hiện những thay đổi không liên quan.
+
+Bạn có thể đề xuất các tính năng mới để nâng cấp game, nhưng phải phân biệt rõ:
+- Tính năng đang có.
+- Tính năng đang bị lỗi.
+- Tính năng chưa có.
+- Tính năng đề xuất thêm.
+
+Không tự ý triển khai một tính năng lớn khi chưa được đồng ý.
+
+Mỗi lần làm việc phải:
+- Xác định mục tiêu.
+- Kiểm tra các file liên quan.
+- Thực hiện thay đổi nhỏ.
+- Kiểm tra lỗi.
+- Chạy build khi phù hợp.
+- Báo cáo kết quả.
+
+Cuối mỗi câu trả lời luôn có mục:
+
+**TÓM TẮT:**
+Nêu ngắn gọn những gì đã làm, những gì chưa hoàn thành và vấn đề còn tồn tại.
+
+## D. NHIỆM VỤ HIỆN TẠI
+
+Sau khi đọc toàn bộ bối cảnh này và MASTER PROMPT nâng cấp game nhà tù 3D, hãy tiến hành GIAI ĐOẠN 0.
+
+Chỉ kiểm tra và phân tích trước.
+
+Hãy lập danh sách:
+1. Những chức năng hiện có.
+2. Những chức năng còn thiếu.
+3. Những lỗi cần xử lý.
+4. Cơ chế mobile đang ép xoay ngang.
+5. Tình trạng chat và PostgreSQL.
+6. Cách mở rộng map 9 tầng mà không phá multiplayer.
+7. Những module cần thêm cho NPC, vũ khí và nhiệm vụ.
+8. Các rủi ro kỹ thuật.
+9. Kế hoạch thực hiện theo từng giai đoạn.
+
+Chưa sửa code cho đến khi chủ dự án đồng ý.
+
+# E. QUY TẮC AN TOÀN KỸ THUẬT VÀ KIỂM THỬ BỔ SUNG
+
+## 1. Bảo vệ Git và source code
+
+Trước mỗi lần chỉnh sửa:
+- Kiểm tra Git branch, HEAD và working tree.
+- Kiểm tra các file đã sửa nhưng chưa commit.
+- Không ghi đè hoặc xóa thay đổi chưa được commit.
+- Không reset, rebase hoặc force push.
+- Không tự ý xóa commit cũ.
+- Nếu phát hiện xung đột hoặc nguy cơ mất dữ liệu, phải dừng và báo cáo.
+
+## 2. Bảo vệ dữ liệu và chi phí
+
+- Không xóa dữ liệu PostgreSQL.
+- Không tự ý thay đổi schema database.
+- Không tạo database hoặc dịch vụ trả phí.
+- Không tự ý nâng cấp gói Render.
+- Không thay đổi Environment Variables khi chưa được cho phép.
+- Không đưa thông tin bí mật vào source code hoặc GitHub.
+
+## 3. Kiểm thử thiết bị di động
+
+Không được chỉ dựa vào Chrome DevTools để kết luận mobile đã hoạt động hoàn chỉnh.
+
+Phải xây dựng checklist kiểm thử riêng cho:
+- Android Chrome.
+- iPhone Safari.
+- Portrait.
+- Landscape.
+- Xoay màn hình trong khi chơi.
+- Joystick và camera.
+- Chat và nhập liệu.
+- Nút tương tác.
+- Menu và HUD.
+- Hiệu năng trên thiết bị cấu hình thấp.
+
+Nếu không có thiết bị vật lý để kiểm tra, phải ghi rõ những nội dung chưa thể xác nhận.
+
+## 4. Kiểm soát hiệu năng
+
+- Không tải toàn bộ chi tiết bản đồ và NPC cùng lúc nếu không cần thiết.
+- Sử dụng cơ chế quản lý khu vực và tài nguyên.
+- Giới hạn số NPC hoạt động đồng thời.
+- Có cấu hình đồ họa Low, Medium và High.
+- Đo FPS và theo dõi lỗi bộ nhớ khi có điều kiện.
+- Không tuyên bố đạt mục tiêu hiệu năng nếu chưa đo kiểm.
+
+## 5. Quy định trước khi hoàn thành mỗi giai đoạn
+
+Mỗi giai đoạn phải có:
+- Danh sách file đã thay đổi.
+- Mục đích của từng thay đổi.
+- Kết quả build.
+- Kết quả kiểm thử.
+- Lỗi còn tồn tại.
+- Hướng khôi phục nếu có sự cố.
+
+Chỉ được chuyển sang giai đoạn tiếp theo khi chủ dự án đồng ý.
+
+**Nguyên tắc cuối cùng: Ưu tiên bảo vệ game đang hoạt động, không đánh đổi sự ổn định của multiplayer, chat, dữ liệu và mobile chỉ để bổ sung nhanh tính năng mới.**
+### 3.5. KIỂM TRA TOÀN BỘ LUỒNG KHỞI TẠO GAME TRÊN MOBILE
+
+Không được chỉ tìm và xóa `screen.orientation.lock()` hoặc overlay xoay ngang.
+
+Phải kiểm tra toàn bộ luồng khởi tạo game, bao gồm:
+
+- Kiểm tra thiết bị.
+- Kiểm tra chiều rộng và chiều cao màn hình.
+- Điều kiện khởi tạo renderer.
+- Điều kiện khởi tạo camera.
+- Điều kiện hiển thị HUD.
+- Điều kiện bật joystick.
+- Điều kiện cho phép người chơi tham gia game.
+- Các sự kiện resize và orientationchange.
+- Các đoạn CSS ẩn hoặc vô hiệu hóa giao diện khi ở Portrait.
+- Các thư viện hoặc module bên ngoài có thể yêu cầu Landscape.
+
+Phải lập sơ đồ nguyên nhân trước khi sửa.
+
+Sau khi sửa, kiểm tra các trường hợp:
+
+1. Mở game lần đầu bằng màn hình dọc.
+2. Mở game lần đầu bằng màn hình ngang.
+3. Đang chơi thì xoay từ dọc sang ngang.
+4. Đang chơi thì xoay từ ngang sang dọc.
+5. Chuyển tab rồi quay lại game.
+6. Mở và đóng chat khi đang chơi.
+7. Mở menu rồi quay lại game.
+
+Game phải tiếp tục hoạt động mà không cần tải lại trang.
+
+Không được dùng CSS xoay giao diện để giả lập Landscape.
+
+Nếu một trình duyệt không hỗ trợ một API nào đó, phải có phương án dự phòng thay vì chặn game.
+### 6. QUYỀN PHÊ DUYỆT CỦA CHỦ DỰ ÁN
+
+- Giai đoạn 0 chỉ được đọc, kiểm tra và phân tích.
+- Không sửa code trong Giai đoạn 0.
+- Không tự động chuyển sang giai đoạn tiếp theo.
+- Không tự ý tạo commit.
+- Không tự ý push GitHub.
+- Không tự ý triển khai lên Render.
+- Sau mỗi giai đoạn, phải dừng và chờ chủ dự án kiểm tra, phê duyệt.
+- Nếu phát hiện lỗi nghiêm trọng ngoài phạm vi đang làm, phải báo cáo trước khi xử lý.
+
+**Chủ dự án là người quyết định thời điểm bắt đầu, kết thúc và chuyển sang giai đoạn tiếp theo.**
+## GIAI ĐOẠN: KIỂM TRA VÀ KHẮC PHỤC TOÀN BỘ HỆ THỐNG CHAT MULTIPLAYER
+
+Bạn phải đóng vai trò là lập trình viên chuyên sâu về Node.js, Socket.IO, PostgreSQL và hệ thống Multiplayer Game.
+
+### 1. MỤC TIÊU
+
+Khắc phục triệt để lỗi người chơi không thể gửi tin nhắn trong game Đi Tù 3D.
+
+Sau khi sửa, tất cả người chơi đã kết nối vào cùng server phải có thể nhắn tin và nhận tin nhắn bình thường theo đúng phạm vi của từng loại chat.
+
+Không được chỉ sửa giao diện. Phải kiểm tra toàn bộ luồng dữ liệu từ frontend đến backend và database.
+
+### 2. KIỂM TRA FRONTEND
+
+Kiểm tra:
+- Khung chat có mở và đóng bình thường không.
+- Ô nhập tin nhắn có nhận nội dung không.
+- Nút gửi tin nhắn có hoạt động không.
+- Nhấn Enter có gửi tin nhắn không.
+- Nhấn Shift + Enter có xuống dòng nếu giao diện hỗ trợ không.
+- Có lỗi JavaScript khiến chức năng gửi tin nhắn bị dừng không.
+- Có lỗi trên điện thoại khiến không thể nhập hoặc gửi tin nhắn không.
+- Có gửi đúng Socket.IO event và payload mà backend đang sử dụng không.
+
+Không tự ý thay đổi giao diện chat nếu không cần thiết.
+
+### 3. KIỂM TRA SOCKET.IO VÀ BACKEND
+
+Kiểm tra toàn bộ luồng gửi và nhận tin nhắn:
+- Người chơi kết nối Socket.IO thành công.
+- Server nhận đúng sự kiện gửi tin nhắn.
+- Server xác thực người gửi.
+- Server kiểm tra nội dung tin nhắn.
+- Server xử lý giới hạn tốc độ gửi tin nhắn.
+- Server phát tin nhắn đến đúng người nhận hoặc đúng phòng.
+- Người chơi khác nhận được tin nhắn ngay lập tức.
+- Xử lý trường hợp người chơi mất kết nối rồi kết nối lại.
+- Không để một tin nhắn bị phát hoặc lưu trùng lặp.
+
+Kiểm tra tên sự kiện Socket.IO, cấu trúc dữ liệu gửi đi và dữ liệu trả về giữa frontend và backend. Không tự ý đổi tên event nếu chưa kiểm tra toàn bộ nơi đang sử dụng.
+
+### 4. KHÔI PHỤC ĐẦY ĐỦ CÁC CHẾ ĐỘ CHAT
+
+Phải bảo đảm các chế độ hiện có hoạt động đúng:
+
+- Chat toàn server: mọi người chơi trong cùng server đều nhận được.
+- Chat gần: chỉ người chơi trong phạm vi cho phép nhận được.
+- Chat riêng: chỉ người gửi và người nhận được nhận tin nhắn.
+- Lịch sử chat: tải được tin nhắn cũ nếu hệ thống đang hỗ trợ lưu trữ.
+- Tin nhắn mới: cập nhật tức thời mà không cần tải lại trang.
+
+Không được xóa hoặc làm mất các chức năng chat đã có.
+
+### 5. KIỂM TRA POSTGRESQL VÀ RENDER
+
+Kiểm tra:
+- Biến môi trường DATABASE_URL.
+- Kết nối PostgreSQL trên môi trường Render.
+- Quá trình khởi tạo hoặc kiểm tra bảng lưu tin nhắn.
+- Quyền đọc và ghi dữ liệu.
+- Lỗi truy vấn database.
+- Cơ chế xử lý khi database tạm thời mất kết nối.
+- Trạng thái health check liên quan đến chat.
+
+Nếu hệ thống đang hiển thị chat:false, phải tìm chính xác nguyên nhân.
+
+Không được:
+- Tự ý xóa database.
+- Xóa lịch sử tin nhắn.
+- Tạo lại bảng làm mất dữ liệu.
+- Thay đổi cấu trúc database khi chưa chứng minh cần thiết.
+- Tạo dịch vụ trả phí.
+- Tự ý thay đổi biến môi trường trên Render.
+- Ghi cứng mật khẩu hoặc thông tin kết nối vào source code.
+
+### 6. BẢO MẬT CHAT
+
+Giữ nguyên và bảo đảm:
+- Kiểm tra người gửi ở phía server.
+- Giới hạn tốc độ gửi tin nhắn.
+- Giới hạn độ dài nội dung.
+- Làm sạch và xử lý nội dung đầu vào an toàn.
+- Không cho phép giả mạo danh tính người gửi.
+- Không cho phép gửi tin nhắn vào phòng mà người chơi không có quyền truy cập.
+- Giữ nguyên chức năng chặn, báo cáo và xóa tin nhắn của chính người gửi nếu đang có.
+
+Không được loại bỏ các biện pháp bảo mật hiện tại chỉ để làm cho chat hoạt động.
+
+### 7. KIỂM TRA THỰC TẾ
+
+Phải kiểm tra tối thiểu với hai người chơi:
+
+1. Người chơi A đăng nhập vào game.
+2. Người chơi B đăng nhập vào cùng server.
+3. A gửi tin nhắn.
+4. B phải nhận được tin nhắn ngay lập tức.
+5. B trả lời A.
+6. A phải nhận được tin nhắn.
+7. Kiểm tra chat toàn server.
+8. Kiểm tra chat gần.
+9. Kiểm tra chat riêng.
+10. Tải lại trang và kiểm tra lịch sử chat nếu có hỗ trợ lưu trữ.
+11. Kiểm tra trên máy tính và điện thoại.
+12. Kiểm tra khi một người chơi mất kết nối rồi kết nối lại.
+
+Phải phân biệt rõ:
+- Đã kiểm tra thành công.
+- Đã sửa nhưng chưa kiểm tra được trên Render.
+- Chưa thể kiểm tra do thiếu quyền truy cập hoặc môi trường.
+
+Không được báo cáo chat đã hoạt động nếu chưa thực sự kiểm chứng việc gửi và nhận giữa ít nhất hai người chơi.
+
+### 8. BẢO VỆ DỰ ÁN
+
+- Không viết lại toàn bộ hệ thống chat nếu chỉ có một lỗi nhỏ.
+- Không tạo hệ thống chat mới thay thế hệ thống cũ khi chưa cần thiết.
+- Không làm hỏng multiplayer, hồ sơ người chơi hoặc các chức năng hiện tại.
+- Không tự ý thay đổi cấu hình triển khai Render.
+- Không tự ý commit hoặc push Git khi chưa được chủ dự án đồng ý.
+
+### 9. BÁO CÁO KẾT QUẢ
+
+Sau khi hoàn thành, phải báo cáo:
+
+1. Nguyên nhân gốc rễ khiến không gửi được tin nhắn.
+2. Các file đã kiểm tra.
+3. Các file đã chỉnh sửa.
+4. Những lỗi đã khắc phục.
+5. Kết quả kiểm tra giữa hai người chơi.
+6. Trạng thái kết nối PostgreSQL.
+7. Trạng thái chat trên Render.
+8. Những lỗi còn tồn tại (nếu có).
+
+Không được chuyển sang giai đoạn tiếp theo khi chưa có sự đồng ý của chủ dự án.

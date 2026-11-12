@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#101513">
+    <meta name="description" content="Prison Life 3D - khám phá nhà tù từ góc nhìn thứ ba.">
+    <title>Đi tù 3D</title>
+  </head>
+  <body>
+    <main class="game-shell">
+      <canvas id="game-canvas" aria-label="Thế giới game Prison Life 3D"></canvas>
+      <div class="screen-vignette" aria-hidden="true"></div>
+      <div class="network-status" role="status" aria-live="polite">
+        <span class="network-indicator" id="network-indicator" data-state="idle"></span>
+        <span id="network-label">CHƯA VÀO PHIÊN</span>
+        <strong id="online-count">0/50</strong>
+      </div>
+
+      <aside class="chat-root" id="chat-root" aria-label="Chat nhà tù" hidden>
+        <section class="chat-panel" id="chat-panel">
+          <header class="chat-header">
+            <div class="chat-heading"><span class="chat-live-dot"></span><div><h2>CHAT NHÀ TÙ</h2><span id="chat-status">ĐANG KẾT NỐI</span></div></div>
+            <div class="chat-header-actions">
+              <button class="chat-icon-button" id="chat-sound-button" type="button" title="Bật hoặc tắt âm báo" aria-label="Bật hoặc tắt âm báo">♫</button>
+              <button class="chat-icon-button" id="chat-minimize-button" type="button" title="Thu nhỏ chat" aria-label="Thu nhỏ chat">−</button>
+              <button class="chat-icon-button" id="chat-hide-button" type="button" title="Ẩn chat" aria-label="Ẩn chat">×</button>
+            </div>
+          </header>
+          <nav class="chat-tabs" aria-label="Kênh chat">
+            <button type="button" data-chat-type="global" aria-pressed="true">TOÀN NHÀ TÙ</button>
+            <button type="button" data-chat-type="near" aria-pressed="false">GẦN ĐÂY</button>
+            <button type="button" data-chat-type="private" aria-pressed="false">RIÊNG</button>
+          </nav>
+          <div class="chat-tools">
+            <label for="chat-player-select">NGƯỜI CHƠI</label>
+            <select id="chat-player-select" aria-label="Chọn người chơi để nhắn riêng"></select>
+            <button id="chat-block-button" type="button" title="Chặn hoặc bỏ chặn người chơi" aria-label="Chặn hoặc bỏ chặn người chơi">⊘</button>
+            <label class="chat-opacity" for="chat-opacity-input" title="Độ trong suốt của khung chat">◐
+              <input id="chat-opacity-input" type="range" min="55" max="100" value="92" aria-label="Độ trong suốt khung chat">
+            </label>
+          </div>
+          <ol class="chat-messages" id="chat-messages" aria-live="polite" aria-relevant="additions"></ol>
+          <p class="chat-empty" id="chat-empty">Chưa có tin nhắn trong kênh này.</p>
+          <form class="chat-compose" id="chat-form">
+            <label class="visually-hidden" for="chat-input">Nội dung tin nhắn</label>
+            <textarea id="chat-input" maxlength="500" rows="1" placeholder="Nhập tin nhắn..." required></textarea>
+            <button type="submit" aria-label="Gửi tin nhắn" title="Gửi tin nhắn">GỬI</button>
+          </form>
+          <div class="chat-footline"><span id="chat-feedback" role="status">Tin nhắn tối đa 500 ký tự</span><span id="chat-unread-label"></span></div>
+        </section>
+        <button class="chat-open-button" id="chat-open-button" type="button" aria-label="Mở chat nhà tù" hidden>
+          <span aria-hidden="true">▤</span><span>CHAT</span><b id="chat-unread-count" hidden>0</b>
+        </button>
+      </aside>
+
+      <div class="touch-controls" id="touch-controls" hidden>
+        <div class="touch-joystick touch-control" id="touch-joystick" aria-label="Joystick di chuyển">
+          <span class="touch-joystick-knob" id="touch-joystick-knob"></span>
+        </div>
+        <div class="touch-actions">
+          <button class="touch-action touch-control" id="touch-run" type="button">CHẠY</button>
+          <button class="touch-action touch-control" id="touch-jump" type="button">NHẢY</button>
+          <button class="touch-action touch-control" id="touch-crouch" type="button">CÚI</button>
+          <button class="touch-action touch-control" id="touch-interact" type="button">TƯƠNG TÁC</button>
+          <button class="touch-action touch-control" id="touch-chat" type="button">CHAT</button>
+          <button class="touch-action touch-control" id="touch-menu" type="button">MENU</button>
+        </div>
+      </div>
+
+      <div class="boot-message" id="boot-message" role="status">ĐANG KHỞI TẠO THẾ GIỚI</div>
+      <section class="profile-screen" id="profile-intake" aria-labelledby="intake-title" hidden>
+          <form class="intake-panel" id="profile-form">
+            <div class="game-kicker"><span></span> BLOCK C · TIẾP NHẬN TÙ NHÂN</div>
+            <h1 id="intake-title">PRISON<br><em>LIFE</em> <small>3D</small></h1>
+            <p class="intake-intro">Lập hồ sơ nhân vật để bắt đầu ngày đầu tiên trong khu giam.</p>
+            <div class="intake-fields">
+              <label class="profile-field">
+                <span>TÊN NHÂN VẬT</span>
+                <input id="profile-name" name="name" type="text" minlength="2" maxlength="28" autocomplete="nickname" placeholder="Ví dụ: Alex" required>
+              </label>
+              <label class="profile-field">
+                <span>TUỔI NHÂN VẬT</span>
+                <input id="profile-age" name="age" type="number" min="18" max="99" value="25" required>
+              </label>
+              <label class="profile-field intake-field-wide">
+                <span>VI PHẠM TRONG GAME</span>
+                <select id="profile-offense" name="offense" required>
+                  <option value="Trộm cắp">Trộm cắp</option>
+                  <option value="Đánh nhau">Đánh nhau</option>
+                  <option value="Buôn lậu">Buôn lậu</option>
+                  <option value="Phá hoại tài sản">Phá hoại tài sản</option>
+                  <option value="Vượt ngục">Vượt ngục</option>
+                  <option value="Cướp tài sản">Cướp tài sản</option>
+                  <option value="Vi phạm nội quy nhà tù">Vi phạm nội quy nhà tù</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </label>
+              <label class="profile-field intake-field-wide" id="custom-offense-field" hidden>
+                <span>NHẬP VI PHẠM TRONG GAME</span>
+                <input id="custom-offense" name="customOffense" type="text" maxlength="60" placeholder="Mô tả vi phạm hư cấu" autocomplete="off">
+              </label>
+              <label class="profile-field intake-field-wide">
+                <span>LÝ DO BỊ GIAM (TRONG GAME)</span>
+                <textarea id="profile-reason" name="reason" rows="2" maxlength="140" placeholder="Viết lý do trong câu chuyện nhân vật" required></textarea>
+              </label>
+            </div>
+            <p class="profile-note">Hồ sơ chỉ dành cho nhập vai. Không nhập tên thật hoặc thông tin/tội trạng ngoài đời.</p>
+            <p class="profile-error" id="profile-error" role="alert" hidden></p>
+            <button class="play-button profile-primary" id="play-button" type="submit">
+              <span class="play-icon" aria-hidden="true">▶</span>
+              <span>BẮT ĐẦU CHƠI</span>
+              <span class="button-arrow" aria-hidden="true">↗</span>
+            </button>
+          </form>
+      </section>
+
+      <section class="profile-screen" id="profile-review" aria-labelledby="review-title" hidden>
+        <div class="profile-panel">
+          <div class="game-kicker"><span></span> GIẤY TIẾP NHẬN · BLOCK C</div>
+          <h2 id="review-title">HỒ SƠ<br><em>TÙ NHÂN</em></h2>
+          <dl class="profile-review-grid">
+            <div><dt>TÊN NHÂN VẬT</dt><dd id="review-name"></dd></div>
+            <div><dt>MÃ TÙ</dt><dd id="review-code">CẤP KHI VÀO PHIÊN</dd></div>
+            <div><dt>TUỔI NHÂN VẬT</dt><dd id="review-age"></dd></div>
+            <div><dt>VI PHẠM TRONG GAME</dt><dd id="review-offense"></dd></div>
+            <div class="profile-review-wide"><dt>LÝ DO BỊ GIAM</dt><dd id="review-reason"></dd></div>
+          </dl>
+          <p class="profile-note">Thông tin này là hồ sơ nhân vật nhập vai, không phải dữ liệu ngoài đời.</p>
+          <p class="profile-error" id="profile-connect-error" role="alert" hidden></p>
+          <div class="profile-actions">
+            <button class="text-button" id="edit-profile-button" type="button">CHỈNH SỬA HỒ SƠ</button>
+            <button class="play-button" id="begin-prison-button" type="button">
+              <span class="play-icon" aria-hidden="true">▶</span>
+              <span>BẮT ĐẦU VÀO TÙ</span>
+              <span class="button-arrow" aria-hidden="true">↗</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="game-hud" id="game-hud" aria-label="Trạng thái trong game" hidden>
+        <div class="hud-topline">
+          <div class="location-label"><span class="live-dot"></span><span>BLOCK C</span><b>/</b><span id="zone-name">PHÒNG 04 · TẦNG 01</span></div>
+          <button class="icon-button" id="fullscreen-button" type="button" title="Toàn màn hình" aria-label="Bật hoặc tắt toàn màn hình">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3"/></svg>
+          </button>
+        </div>
+        <div class="objective-panel">
+          <span class="objective-mark">01</span>
+          <div><small>MỤC TIÊU</small><strong>Rời khỏi buồng giam</strong></div>
+        </div>
+        <div class="reticle" aria-hidden="true"><i></i><i></i></div>
+        <div class="interaction-hint" id="interaction-hint" role="status" hidden></div>
+        <section class="elevator-controls" id="elevator-controls" aria-label="Bảng chọn tầng thang máy" hidden>
+          <div class="elevator-controls-heading">
+            <div><small>THANG MÁY</small><strong id="elevator-floor-status" aria-live="polite">CHỌN TẦNG</strong></div>
+            <span>01 — 09</span>
+          </div>
+          <div class="elevator-floor-buttons" id="elevator-floor-buttons">
+            <button type="button" data-floor="0" aria-label="Đi đến tầng 1">1</button>
+            <button type="button" data-floor="1" aria-label="Đi đến tầng 2">2</button>
+            <button type="button" data-floor="2" aria-label="Đi đến tầng 3">3</button>
+            <button type="button" data-floor="3" aria-label="Đi đến tầng 4">4</button>
+            <button type="button" data-floor="4" aria-label="Đi đến tầng 5">5</button>
+            <button type="button" data-floor="5" aria-label="Đi đến tầng 6">6</button>
+            <button type="button" data-floor="6" aria-label="Đi đến tầng 7">7</button>
+            <button type="button" data-floor="7" aria-label="Đi đến tầng 8">8</button>
+            <button type="button" data-floor="8" aria-label="Đi đến tầng 9">9</button>
+          </div>
+          <p>Chọn số tầng hoặc nhấn phím 1–9</p>
+        </section>
+        <div class="elevator-travel-status" id="elevator-travel-status" role="status" hidden></div>
+        <div class="inspect-hint">NHẮM VÀO NGƯỜI CHƠI · NHẤP CHUỘT XEM HỒ SƠ</div>
+        <div class="control-strip"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>DI CHUYỂN</span><kbd>SHIFT</kbd><span>CHẠY</span><kbd>SPACE</kbd><span>NHẢY</span><kbd>C</kbd><span>CÚI</span><kbd>CTRL</kbd><span>HIỆN CHUỘT</span><kbd>ESC</kbd><span>DỪNG</span></div>
+      </section>
+
+      <section class="pause-screen" id="pause-screen" aria-labelledby="pause-title" hidden>
+        <div class="pause-panel">
+          <span class="game-kicker"><span></span> TẠM DỪNG</span>
+          <h2 id="pause-title">GIỮ NHỊP.<br><em>QUAN SÁT.</em></h2>
+          <p>Hành lang không bao giờ thật sự yên tĩnh.</p>
+          <button class="play-button" id="resume-button" type="button">
+            <span class="play-icon" aria-hidden="true">▶</span>
+            <span>TIẾP TỤC</span>
+            <span class="button-arrow" aria-hidden="true">↗</span>
+          </button>
+          <button class="text-button" id="return-menu-button" type="button">QUAY VỀ MÀN HÌNH ĐẦU</button>
+        </div>
+      </section>
+
+      <section class="player-profile-overlay" id="player-profile-modal" aria-labelledby="player-profile-name" aria-modal="true" role="dialog" hidden>
+        <div class="player-profile-panel">
+          <button class="icon-button profile-close" id="close-player-profile" type="button" title="Đóng hồ sơ" aria-label="Đóng hồ sơ">×</button>
+          <div class="game-kicker"><span></span> HỒ SƠ TÙ NHÂN</div>
+          <h2 id="player-profile-name"></h2>
+          <p class="profile-code" id="player-profile-code"></p>
+          <dl class="profile-review-grid">
+            <div><dt>TUỔI NHÂN VẬT</dt><dd id="player-profile-age"></dd></div>
+            <div><dt>TRẠNG THÁI</dt><dd id="player-profile-status"></dd></div>
+            <div class="profile-review-wide"><dt>VI PHẠM TRONG GAME</dt><dd id="player-profile-offense"></dd></div>
+            <div class="profile-review-wide"><dt>LÝ DO BỊ GIAM</dt><dd id="player-profile-reason"></dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <div class="error-message" id="error-message" role="alert" hidden></div>
+      <div class="toast" id="toast" role="status" hidden></div>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
